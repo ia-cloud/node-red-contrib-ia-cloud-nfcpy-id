@@ -1,0 +1,83 @@
+<script type="text/javascript">
+    RED.nodes.registerType('ia-cloud-nfcpy',{
+        category: 'input',
+        color: '#52c3eb',
+        defaults: {
+            waitTime: {value:"1", validate:RED.validators.number()},
+            name: {value:""},
+            // ignoreTime: {value:"5", validate:RED.validators.number()},
+            sendTime: {value:"10", validate:RED.validators.number()}
+            // ,formatter: {value:"123" }
+        },
+        inputs:0,
+        outputs:1,
+        align: 'left',
+        icon: "nfc.png",
+        label: function() {
+            return this.name||"ia-cloud-nfcpy";
+        },
+        oneditprepare: function(){
+          $( "#node-input-waitTime" ).spinner({min:1});
+          // $( "#node-period-to-ignore" ).spinner({min:0});
+          $( "#node-period-to-send" ).spinner({min:0});
+        },
+        oneditsave: function(){
+
+        }
+});
+</script>
+
+<script type="text/x-red" data-template-name="ia-cloud-nfcpy">
+    <div class="form-row">
+        <label for="node-input-waitTime"><i class="fa fa-clock-o"></i> カード<br>　検出間隔</label>
+        <input id="node-input-waitTime"  value="1" style="width:50px !important"></input>
+        <label for="node-input-waitTime"> 秒</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> 名称</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <hr>
+    <!-- <div class="form-row">
+        <label for="node-period-to-ignore"><i class="fa fa-clock-o"></i> 同一カード<br>　検出間隔</label>
+        <input id="node-period-to-ignore" value="5" style="width:50px !important"></input>
+        <label for="node-period-to-ignore">  秒</label>
+      </div> -->
+      <div class="form-row">
+        <label for="node-period-to-send"><i class="fa fa-clock-o"></i> データ<br>　送信間隔</label>
+        <input id="node-period-to-send" value="10" style="width:50px !important"></input>
+        <label for="node-period-to-send">  秒</label>
+    </div>
+    <!-- <div class="form-row">
+        <label for="node-input-formatter"><i class="icon-tag"></i> 出力<br>　フォーマット</label>
+        <input type="checkbox" id="node-input-checkbox"  !important"></input>
+    </div>
+    <div class="form-row">
+        <textarea id="node-input-formatter" style="width:400px; height:200px !important"></textarea>
+    </div> -->
+  </script>
+
+<script type="text/x-red" data-help-name="ia-cloud-nfcpy">
+    <p>Read the card ID (Mifare: UID, FeliCa: IDm) with nfcpy-id (a Python module).</p>
+    <p>Before using, install <code>nfcpy-id</code>(a Python module).</p>
+    <p>This node can't catch touchend event.</p>
+    <p><code>waitTime</code> is restart timing after touched nfcCard.</p>
+    <p><code>type</code>'s list
+        <ul>
+            <li>Type 2 -- MIFARE</li>
+            <li>Type 3 -- FeliCa</li>
+            <li>Type 4 -- MIFARE DESFire</li>
+        </ul>
+    </p>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+    <dt>payload
+        <span class="property-type">Card Id | string</span>
+    </dt>
+    <dt>type
+        <span class="property-type">Card Type| string</span>
+    </dt>
+    <dt>timestamp
+        <span class="property-type">timestamp | int </span>
+    </dt>
+</script>
