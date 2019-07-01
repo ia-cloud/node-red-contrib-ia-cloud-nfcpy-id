@@ -1,33 +1,33 @@
 module.exports = function(RED) {
     'use strict';
-    var nfcpyid = require('node-nfcpy-id').default;
+    let nfcpyid = require('node-nfcpy-id').default;
+    let moment  = require('moment');
 
-    function nfcpyidNode(n) {
-        RED.nodes.createNode(this,n);
-        this.waitTime   = n.waitTime * 1000;
-        this.sendTime   = n.sendTime * 1000;  // 一回の送信をまとめる時間
-        var node        = this;
-        var nfc         = new nfcpyid({mode:'non-touchend'}).start();
-        var startTime   = false;              // 10秒ポーリング開始時間
-        var cardArray   = [];                 // メッセージを貯める配列,カードID,タイプ、受信時刻
+    function nfcpyidNode(config) {
+        RED.nodes.createNode(this,config);
+        this.waitTime   = config.waitTime * 1000;
+        this.sendTime   = config.sendTime * 1000;  // 一回の送信をまとめる時間
+        let node        = this;
+        let nfc         = new nfcpyid({mode:'non-touchend'}).start();
+        let startTime   = false;              // 10秒ポーリング開始時間
+        let cardArray   = [];                 // メッセージを貯める配列,カードID,タイプ、受信時刻
 
-        this.status({fill:"green",shape:"ring",text:"waiting"});
+        this.status({fill:"green",shape:"ring",text:"ia-cloud-nfcpy.runtime.waiting"});
         nfc.on('touchstart', (card) => {
             try{
-                this.status({fill:"green",shape:"dot",text:"touched:"+(cardArray.length+1)});
+                this.status({fill:"green",shape:"dot",text:"ia-cloud-nfcpy.runtime.touched"});
                 if(startTime == false && cardArray.length == 0){
-                    startTime = Date.now();
+                    startTime = moment().unix();
                     timer_of_send(node);
                 }
                 setTimeout(() =>{
                     nfc.start();
-                    this.status({fill:"green",shape:"ring",text:"waiting"});
+                    this.status({fill:"green",shape:"ring",text:"ia-cloud-nfcpy.runtime.waiting"});
                 },node.waitTime);
-
-                var msg = {
-                    'payload'   : card.id,
-                    'type'      : card.type,
-                    'timestamp' : Date.now()
+                let msg = {
+                    "payload"   : card.id,
+                    "type"      : card.type,
+                    "timestamp" : moment().format()
                 };
                 cardArray.push(msg);
             }catch(err){
@@ -39,7 +39,7 @@ module.exports = function(RED) {
         nfc.on('error', (err) => {
             // standard error output (color is red)
             console.error('\u001b[31m', err, '\u001b[0m');
-            node.error("カード取得全体でエラーが発生しました");
+            node.error("カードリーダーにエラーが発生しました");
         });
 
         node.on('close',function(){
@@ -48,27 +48,33 @@ module.exports = function(RED) {
 
         function timer_of_send(){   // 10秒タイマー + メッセージ送信
 
-            var newMsg = {                  // 新規に送信するメッセージ
-                "payload"     : {
-                    "objectType"        : "iaCloudObject",
-                    "objectKey"         : "12345" ,
-                    "objectDescription" : "node-red-contrib-ia-cloud-nfcpy-id" ,
-                    "timestamp"         : Date.now(),
-                    "instanceKey"       : "string",
-                    "objectContent"     : [] }
+            let newMsg = {                  // 新規に送信するメッセージ
+                "request"       : "store",
+                "dataObject"    : {
+                    "objectType"        : "iaCloudObjectArray",
+                    "objectKey"         : "RFID",
+                    "objectDescription" : "RFID",
+                    "timeStamp"         : moment().format(),
+                    "length"            : 0,
+                    "objectArray"       : []
+                }
             };
             try{
                 setTimeout(() => {
-                    for(var k in cardArray){
+                    for(let k in cardArray){
                         if(k == 0 || (k > 0 && cardArray[k].payload != cardArray[k-1].payload)){
-                            newMsg.payload.objectContent.push({
-                                "dataName"    : "NfcData",
-                                "commonName"  : "node-red-contrib-ia-cloud-nfcpy-id" ,
-                                "dataValue"   : cardArray[k].payload,
-                                'type'        : cardArray[k].type,
-                                'timestamp'   : cardArray[k].timestamp }); 
+                            // newMsg.payload.dataObject.objectArray.push({
+                            newMsg.dataObject.objectArray.push({
+                                "objectType"    : "iaCloudObject",
+                                "objectKey"     : "cardID",
+                                "instanceKey"   : "cardID" + cardArray[k].timestamp,
+                                "objectContent" : cardArray[k].payload
+                            //    ,"timeStamp"     : cardArray[k].timestamp
+                             }); 
                         }
                     }
+                    // newMsg.payload.dataObject.length = newMsg.payload.dataObject.objectArray.length;
+                    newMsg.dataObject.length = newMsg.dataObject.objectArray.length;
                     startTime   = false;
                     cardArray   = [];
                     node.send(newMsg);
@@ -86,6 +92,5 @@ module.exports = function(RED) {
             }
         }
     }
-    RED.nodes.registerType("ia-cloud-nfcpy",nfcpyidNode);
-
+    RED.nodes.registerType("RFID",nfcpyidNode);
 }

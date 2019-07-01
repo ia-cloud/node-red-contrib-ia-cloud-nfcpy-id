@@ -1,6 +1,6 @@
 {
-  "name": "node-red-contrib-ia-cloud-nfcpy-id",
-  "version": "0.2.8",
+  "name": "RFID",
+  "version": "0.8.0",
   "description": "Read the card ID (Mifare: UID, FeliCa: IDm) with nfcpy (a Python module).\r\nThis node can't catch touchend event.",
   "main": "ia-cloud-nfcpy-id.js",
   "scripts": {
@@ -12,10 +12,11 @@
   },
   "node-red": {
     "nodes": {
-      "ia-cloud-nfcpy": "ia-cloud-nfcpy-id.js"
+      "RFID": "ia-cloud-nfcpy-id.js"
     }
   },
   "dependencies": {
+    "moment": "^2.24.0",
     "node-nfcpy-id": "^0.1.1"
   },
   "keywords": [
@@ -23,10 +24,11 @@
     "node-red",
     "nfcreader"
   ],
-  "author": "togiwara",
+  "author": "ia-cloud project menbers",
   "license": "Apache2.0",
   "bugs": {
     "url": "https://github.com/togiwara/node-red-contrib-nfcpy-id/issues"
   },
-  "homepage": "https://github.com/togiwara/node-red-contrib-nfcpy-id#readme"
+  "homepage": "https://github.com/togiwara/node-red-contrib-nfcpy-id#readme",
+  "devDependencies": {}
 }
