@@ -25,7 +25,7 @@
     "nfcreader"
   ],
   "author": "ia-cloud project menbers",
-  "license": "Apache2.0",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/togiwara/node-red-contrib-nfcpy-id/issues"
   },
